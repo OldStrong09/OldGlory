@@ -1,5 +1,5 @@
 (()=>{
- const KEY='apex-ledger-qualification-v3';
+ const KEY='apex-ledger-qualification-v4';
  const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
  const save=x=>localStorage.setItem(KEY,JSON.stringify(x));
  function evaluate(metrics={}){
@@ -12,20 +12,20 @@
    ['OOS_MUESTRA',m.backtestTestTrades>=30,`Test/OOS ≥30 trades (${m.backtestTestTrades})`],
    ['OOS_PF',m.backtestTestPF>=1.1,`PF OOS ≥ 1.10 (${Number(m.backtestTestPF).toFixed(2)})`],
    ['OOS_EXPECTATIVA',m.backtestTestExpectancyR>0,`Expectativa OOS R > 0 (${Number(m.backtestTestExpectancyR).toFixed(2)})`],
-   ['GENERALIZACION',m.generalizationRatio===null||m.generalizationRatio>=.5,`OOS conserva ≥50% de la expectativa de train (${m.generalizationRatio===null?'—':Number(m.generalizationRatio).toFixed(2)})`],
+   ['GENERALIZACION',m.generalizationRatio!==null&&m.generalizationRatio>=.5,`OOS conserva ≥50% de la expectativa de train (${m.generalizationRatio===null?'—':Number(m.generalizationRatio).toFixed(2)})`],
    ['REGIMENES',Number(m.regimeWarnings||0)===0,`Sin regímenes débiles con muestra suficiente (${Number(m.regimeWarnings||0)})`],
    ['PAPER_MUESTRA',m.paperTrades>=50,`≥50 trades paper (${m.paperTrades})`],
    ['PAPER_VIOLACIONES',m.paperViolations===0,`0 violaciones de riesgo (${m.paperViolations})`],
    ['BOT_HEALTH',m.health==='HEALTHY',`Estado HEALTHY (${m.health})`],
-   ['KILL_SWITCH',m.killSwitch===false,'Kill switch desarmado']
+   ['KILL_SWITCH',m.killSwitch===false,'Kill switch desarmado'],
+   ['PROCESO_SUPERVISADO',m.paperTrades>=100&&m.processScore>=80,`Supervisión: ≥100 paper y score ≥80 (${m.paperTrades}, ${Number(m.processScore||0).toFixed(1)})`]
   ];
-  const backtestReady=gates.slice(0,9).every(g=>g[1]),paperReady=gates.slice(9).every(g=>g[1]);
+  const backtestReady=gates.slice(0,9).every(g=>g[1]),paperReady=gates.slice(9,13).every(g=>g[1]),supervised=backtestReady&&paperReady&&gates[13][1];
   let stage='NO APTO';
   if(backtestReady)stage='OBSERVACIÓN';
   if(backtestReady&&paperReady)stage='PAPER VALIDADO';
-  const supervised=backtestReady&&paperReady&&m.paperTrades>=100&&m.processScore>=80;
   if(supervised)stage='SUPERVISADO';
-  const result={stage,passed:gates.filter(g=>g[1]).length,total:gates.length,gates,liveLocked:true,evaluatedAt:new Date().toISOString(),metrics:{...m}};
+  const result={stage,passed:gates.filter(g=>g[1]).length,total:gates.length,gates,liveLocked:true,liveExecutionEnabled:false,evaluatedAt:new Date().toISOString(),metrics:{...m}};
   save(result);window.tradePilotAudit?.record('QUALIFICATION_GATE',result);return result;
  }
  function get(){return read()}
