@@ -9,6 +9,7 @@
     calc.insertAdjacentElement('afterend',b);
     b.onclick=()=>{
       const p=readPlan();
+      if(p.bias==='ESPERAR'){alert('El plan está en ESPERAR. No se puede convertir en una operación hasta definir LONG o SHORT.');return}
       if(!p.entry||!p.sl||!p.tp){alert('Completa Entrada, Stop Loss y Take Profit antes de enviar el plan.');return}
       const go=window.go;
       if(typeof go==='function')go('journal');
@@ -30,13 +31,10 @@
     const card=document.createElement('div');card.id='data-health';card.className='card';
     card.innerHTML='<div class="section-head"><div><h2>Estado de la cuenta demo</h2><p>Comprobación rápida de tus datos locales.</p></div></div><div class="discipline-list" id="data-health-list"></div>';
     const footer=host.querySelector('.app-footer');host.insertBefore(card,footer||null);
-    const list=$('#data-health-list');
-    let trades=[];try{trades=JSON.parse(localStorage.getItem('tradepilot-trades-v2')||'[]')}catch{}
-    const plan=readPlan();
-    const valid=Array.isArray(trades);
-    list.innerHTML=`<div><span>Operaciones guardadas</span><strong>${valid?trades.length:0}</strong></div><div><span>Plan guardado</span><strong>${plan.entry&&plan.sl&&plan.tp?'✓':'—'}</strong></div><div><span>Almacenamiento</span><strong>LOCAL</strong></div><div><span>Ejecución real</span><strong>DESACTIVADA</strong></div>`;
+    updateHealth();
   }
-  function init(){addPlanJournal();addDataHealth()}
+  function updateHealth(){const list=$('#data-health-list');if(!list)return;let trades=[];try{trades=JSON.parse(localStorage.getItem('tradepilot-trades-v2')||'[]')}catch{}const plan=readPlan(),valid=Array.isArray(trades);list.innerHTML=`<div><span>Operaciones guardadas</span><strong>${valid?trades.length:0}</strong></div><div><span>Plan guardado</span><strong>${plan.entry&&plan.sl&&plan.tp?'✓':'—'}</strong></div><div><span>Almacenamiento</span><strong>LOCAL</strong></div><div><span>Ejecución real</span><strong>DESACTIVADA</strong></div>`}
+  function init(){addPlanJournal();addDataHealth();updateHealth()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-  window.addEventListener('load',init);
+  window.addEventListener('load',init);window.addEventListener('apex-data-updated',updateHealth);
 })();
