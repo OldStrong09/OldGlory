@@ -1,23 +1,26 @@
 (()=>{
- const KEY='apex-ledger-qualification-v1';
+ const KEY='apex-ledger-qualification-v2';
  const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
  const save=x=>localStorage.setItem(KEY,JSON.stringify(x));
  function evaluate(metrics={}){
-   const m={backtestTrades:0,backtestPF:0,backtestExpectancyR:0,backtestMaxDD:100,paperTrades:0,paperViolations:0,health:'UNKNOWN',killSwitch:false,...metrics};
+   const m={backtestTrades:0,backtestPF:0,backtestExpectancyR:0,backtestMaxDD:100,backtestTestTrades:0,backtestTestPF:0,backtestTestExpectancyR:0,paperTrades:0,paperViolations:0,health:'UNKNOWN',killSwitch:false,...metrics};
    const gates=[
     ['BACKTEST_MUESTRA',m.backtestTrades>=100,`≥100 trades (${m.backtestTrades})`],
     ['BACKTEST_PF',m.backtestPF>=1.2,`PF ≥ 1.20 (${Number(m.backtestPF).toFixed(2)})`],
     ['BACKTEST_EXPECTATIVA',m.backtestExpectancyR>0,`Expectativa R > 0 (${Number(m.backtestExpectancyR).toFixed(2)})`],
     ['BACKTEST_DRAWDOWN',m.backtestMaxDD<=20,`DD máximo ≤ 20% (${Number(m.backtestMaxDD).toFixed(1)}%)`],
+    ['OOS_MUESTRA',m.backtestTestTrades>=30,`Test/OOS ≥30 trades (${m.backtestTestTrades})`],
+    ['OOS_PF',m.backtestTestPF>=1.1,`PF OOS ≥ 1.10 (${Number(m.backtestTestPF).toFixed(2)})`],
+    ['OOS_EXPECTATIVA',m.backtestTestExpectancyR>0,`Expectativa OOS R > 0 (${Number(m.backtestTestExpectancyR).toFixed(2)})`],
     ['PAPER_MUESTRA',m.paperTrades>=50,`≥50 trades paper (${m.paperTrades})`],
     ['PAPER_VIOLACIONES',m.paperViolations===0,`0 violaciones de riesgo (${m.paperViolations})`],
     ['BOT_HEALTH',m.health==='HEALTHY',`Estado HEALTHY (${m.health})`],
     ['KILL_SWITCH',m.killSwitch===false,'Kill switch desarmado']
    ];
-   const passed=gates.filter(g=>g[1]).length;
+   const passed=gates.filter(g=>g[1]).length,critical=gates.slice(0,7).every(g=>g[1]),paperReady=gates.slice(7).every(g=>g[1]);
    let stage='NO APTO';
-   if(passed>=3)stage='OBSERVACIÓN';
-   if(passed===gates.length)stage='PAPER VALIDADO';
+   if(critical)stage='OBSERVACIÓN';
+   if(critical&&paperReady)stage='PAPER VALIDADO';
    const result={stage,passed,total:gates.length,gates,liveLocked:true,evaluatedAt:new Date().toISOString()};
    save(result);window.tradePilotAudit?.record('QUALIFICATION_GATE',result);return result;
  }
