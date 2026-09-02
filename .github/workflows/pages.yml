@@ -31,6 +31,8 @@ jobs:
           node --check backup.js
           node --check settings.js
           node --check sw.js
+          node --check ux.js
+          node --check journal_plus.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
