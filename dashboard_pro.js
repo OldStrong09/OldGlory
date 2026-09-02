@@ -12,7 +12,7 @@
     const group=(key,requireData=false)=>{const m={};a.forEach(t=>{const raw=String(t[key]||'').trim();if(requireData&&!raw)return;const k=raw||'Sin dato';(m[k]??=[]).push(Number(t.result))});return Object.entries(m).map(([k,v])=>({k,n:v.length,net:v.reduce((x,y)=>x+y,0),avg:v.reduce((x,y)=>x+y,0)/v.length})).sort((x,y)=>y.net-x.net)};
     const complete=a.filter(t=>String(t.session||'').trim()&&String(t.strategy||'').trim()&&String(t.sl||'').trim()&&String(t.tp||'').trim()&&String(t.notes||'').trim()).length;
     const quality=n?Math.round(complete/n*100):0;
-    const monthly={};a.forEach(t=>{const k(/^\d{4}-\d{2}/.test(t.date)?String(t.date).slice(0,7):'Sin fecha');(monthly[k]??=[]).push(Number(t.result))});
+    const monthly={};a.forEach(t=>{const k=/^\d{4}-\d{2}/.test(t.date)?String(t.date).slice(0,7):'Sin fecha';(monthly[k]??=[]).push(Number(t.result))});
     const months=Object.entries(monthly).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,6).map(([k,v])=>({k,n:v.length,net:v.reduce((x,y)=>x+y,0),wr:v.filter(x=>x>0).length/v.length*100}));
     let streak=0,best=0,worst=0; a.forEach(t=>{if(Number(t.result)>0){streak=streak>=0?streak+1:1;best=Math.max(best,streak)}else if(Number(t.result)<0){streak=streak<=0?streak-1:-1;worst=Math.min(worst,streak)}});
     return {n,net,expectancy,pf,maxDD,sessions:group('session',true),strategies:group('strategy',true),quality,months,bestStreak:best,worstStreak:Math.abs(worst)};
