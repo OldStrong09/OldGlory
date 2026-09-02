@@ -25,7 +25,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate JavaScript
         run: |
-          for f in *.js; do node --check "$f"; done
+          set -e
+          for f in *.js; do echo "Checking $f"; node --check "$f"; done
+      - name: Verify required Apex modules
+        run: |
+          set -e
+          for f in index.html automation_policy.js automation_gates.js qualification_ui.js execution_gateway.js bot_health.js backtest_engine.js simulation_engine.js regime_engine.js; do test -f "$f" || { echo "Missing $f"; exit 1; }; done
+          grep -q "LIVE BLOQUEADO" index.html
+          grep -q "EXECUTION_GATEWAY_LOCKED" execution_gateway.js
+          grep -q "liveExecutionEnabled:false" automation_policy.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
