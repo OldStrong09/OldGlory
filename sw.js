@@ -1,4 +1,4 @@
-const CACHE='apex-ledger-v13';
+const CACHE='apex-ledger-v14';
 const ASSETS=['./','./index.html','./styles.css','./preflight.js','./app.js','./risk.js','./analytics.js','./backup.js','./settings.js','./ux.js','./journal_plus.js','./pro.js','./dashboard_pro.js','./trader_insights.js','./trade_scoring.js','./calculator_plus.js','./manifest.json','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('apex-ledger-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
