@@ -25,14 +25,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate JavaScript
         run: |
-          node --check app.js
-          node --check risk.js
-          node --check analytics.js
-          node --check backup.js
-          node --check settings.js
-          node --check sw.js
-          node --check ux.js
-          node --check journal_plus.js
+          for f in *.js; do node --check "$f"; done
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
